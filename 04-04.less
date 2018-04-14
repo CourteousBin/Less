@@ -1,0 +1,600 @@
+/* 
+	Less 
+		- 变量 @
+		- 使用属性名和选择器就要 用{ }
+		- 作为Url 变量
+		-  Case(练习){
+			@color:green;
+			 @wd:width;
+			 @hg:height;
+			 @chooise:div2;
+			div {
+				background:@color;
+				@{wd}: 100px;
+				height: 100px;
+			}
+
+			.@{chooise} {
+				@{wd}:100px;
+				@{hg}:100px; 
+				background: red;
+			}
+
+			// url变量
+			@imgSrc:'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522861819198&di=8b4613591ef315d54674ba7d210b0bd3&imgtype=0&src=http%3A%2F%2Foss.aliyuncs.com%2Fmsimage%2FUpload%2Fwww.kashangwl.com%2FCooperationLink%2F9ccc1233-d045-4fb1-9892-5f70a6a48abf.png';
+			.url {
+				background: url("@{imgSrc}");
+				@{wd}:400px;
+				@{hg}:400px;
+			}
+		}
+
+
+		- 多个相同变量问题
+			- 会根据优先规则确定那一个值 , 在two里面 , @var 最后赋值3 , 所以 echo出是3
+			- 作用域问题 , one的echo 不会进去 two里面找 , 所以One 输出1	
+			- case{
+				// 定义多个相同名称变量
+				@var:0;
+				.one {
+					@var 1;
+
+					.two {
+						@var 2;
+						echo:@var;		//输出3
+						@var 3;
+					}
+					
+					echo:@var; 			//输出1
+				}
+			}
+
+		- 混编
+			- case{
+			 	// 混编
+					 .bh {
+						width: 100px;
+						height: 100px;	
+					 }
+					 .div1 {
+					 	background: red;
+					 	// 直接插入一个样式
+					 	.bh;
+					 }
+					 .div2 {
+					 	background: blue;
+					 	// 直接插入一个样式
+					 	.bh;
+					 }
+
+				// 加个括号意思 , 就是不编译带 ()的成CSS , 而是谁调用再编译
+					.bh() {
+						width: 100px;
+						height: 100px;	
+					 }
+					 .div1 {
+					 	background: red;
+					 	// 直接插入一个样式
+					 	.bh;
+					 }
+					 .div2 {
+					 	background: blue;
+					 	// 直接插入一个样式
+					 	.bh;
+					 }
+
+				// 带选择器的混编
+						// 首先 , 带了(),只有被调用才会被解析
+					.my-hover-mixin(){
+						&:hover {
+							border:1px solid red;
+						}
+					}
+					.div1 {
+						// 这里就等于 .div1:hover {border: 1px solid red;}
+						.my-hover-mixin();
+						width: 100px;
+						height: 100px;
+					}
+
+				// 带参数传参混编
+					.border(@color){
+						border: 1px solid @color;
+					}
+					.wh(){
+						width: 100px;
+						height: 100px;
+					}
+					.div1 {
+						&:hover {
+							.border(red);
+						}
+						.wh();
+					}
+					.div2 {
+						&:hover {
+							.border(green);
+						}
+						.wh();
+					}
+
+				// 带参数并且有默认值
+					.border(@color:red){
+						border: 1px solid @color;
+					}
+					.wh(){
+						width: 100px;
+						height: 100px;
+					}
+					.div1 {
+						&:hover {
+							// 没有传参不会报错,默认为red
+							.border();
+						}
+						.wh();
+					}		
+
+				// 带参数并且有默认值
+					.border(@color:red){
+						border: 1px solid @color;
+					}
+					.wh(){
+						width: 100px;
+						height: 100px;
+					}
+					.div1 {
+						&:hover {
+							// 没有传参不会报错,默认为red
+							.border();
+						}
+						.wh();
+					}
+
+				// 带多个参数的混合
+
+					// 用分号分隔
+					.border(@size;@type;@color;){
+						border: @size @type @color;
+					}
+					.wh(@w;@h){
+						width: @w;
+						height: @h;
+					}
+					.div1 {
+						.border(1px;solid;red);
+						.wh(100px;100px);
+					}
+
+					// 用逗号分隔
+					.mg(@margin:2;@padding;){
+						margin: @margin;
+						padding: @padding;
+					}
+					.div2 {
+						.wh(100px;100px);
+						.border(2px;solid;green);
+						// 当你用逗号隔开 , 编译器默认为一个整体, 就是@marign = 10px,20px,30px,40px
+						// 如果用分号隔开 , 那么就会是 @padding:10px 10px 10px 10px;
+						.mg(10px,20px,30px,40px;10px);
+					}
+
+				// 定义多个具有相同名称和参数数量的混合
+					.wh(@w){
+						width: @w; 
+					}
+					.wh(@w;@h:500px){
+						width: @w;
+						height: @h;
+					}
+					.wh(@w;@h;@border){	
+						width: @w;
+						height: @h;
+						border: @border;
+					}
+					.div1 {
+						// 出现2
+						// .wh(100px);
+						
+						// 出现3
+						.wh(100px;100px;1px solid red);
+						
+					}
+				
+				// 命名参数
+					.wh(@w;@h;@b){
+						width: @w;
+						height: @h;
+						border: @b;
+					}
+					.div1 {
+						// 如果带了前缀(命名) , 那么就算顺序混乱也不会错
+						.wh(@h:500px;@b:1px solid red;@w:200px);
+					}
+					.div2 {
+						// 如果没有前缀(命名) , 那么根据传参的顺序
+						.wh(200px;@b:1px solid green;100px);
+					}
+						
+				// argument变量
+					.b(@x:solid;@c:red){
+						// 会依次把变量加上去 , 前提必须有默认值
+						border: 10px @arguments;
+					}
+					.div1 {
+						width: 10px;
+						height: 100px;
+						.b();
+					}
+
+				// 匹配模式
+					.border(all,@w:10px){
+						border-radius: @w;
+					}
+					.border(TL,@w:10px){
+						border-top-left-radius: @w;
+					}
+					.border(TR,@w:10px){
+						border-top-right-radius: @w;
+					}
+					.border(BL,@w:10px){
+						border-bottom-left-radius: @w
+					}
+					.border(BR,@w:10px){
+						border-bottom-right-radius: @w;
+					}
+					.div1 {
+						// 选择全部模式
+						.border(all);
+						width: 100px;
+						height: 100px;
+						border:1px solid red;
+					}
+					.div2 {
+						// 选择全部模式
+						.border(TL);
+						width: 100px;
+						height: 100px;
+						border:1px solid red;
+					}
+
+				// 混合中变量返回值
+					.wh(@w;@h){
+						// @w + @h 返回@wh
+						@wh:(@w+@h);
+						// 可以返回多个值
+						@pd:(@h - @w);
+					}
+					.div1 {
+						// 返回@wh;
+						.wh(100px;200px);
+						margin: @wh;
+						width: 100px;
+						height: 100px;
+						background: red;
+						// 返回@pd
+						padding: @pd;
+					}		
+		
+			}
+
+		- 嵌套规则
+			 - 模仿了 HTML 结构, 让CSS 代码更加清晰明了 
+			 - case{
+
+				// 基本CSS格式
+					.head {
+						background: red;
+					}
+					.head h1 {
+						font-size: 18px;
+						color: green;
+					}
+					.head h2 {
+						font-size: 10px;
+						color: white;
+					}
+
+				// Less 嵌套写法
+					.head {
+						background: red;
+						h1 {
+							font-size: 18px;
+							color: green;
+						}
+						h2 {
+							font-size: 15px;
+							color: white;
+						}
+					}
+
+				
+				// 父元素选择器
+					// 传统写法
+					.head h2:hover {
+						font-size: 10px;
+					}
+					// &写法
+					.head {
+						background: blue;
+						h2 {
+							color: white;
+							&:hover {
+								color: red;
+							}
+						}
+					}
+
+				// 改变选择器的顺序
+					.a {
+						.b{
+							.c{
+								color:123;
+							}
+						}
+					} // css 编译就是 .a .b .c {color:123}
+
+					.a{
+						.b{
+							.c&{
+								color: 123;
+							}
+						}
+					} // css 编译就是 .c .a .b {color:123} , 把c 提前了	
+
+				 // 组合
+					 p,a,ul,li {
+					 	border-top: 2px solid red;
+					 	& & {
+					 		border-top: 0
+					 	}
+					 }
+
+			 }
+
+		- 运算
+			- 任何数值 颜色 和 变量都可以进行运算
+			- Less会自动判断数值 , 所以不必要每个数值都加上单位 (但必须有一个要有单位)				 		
+			- Case {
+				
+				// 基本运算
+					.div1{
+						width: 450px + 450px; 
+						height: 400px + 400px;
+						// 背景颜色也都可以加减
+						// #151515 => rgb(21,21,21) , +21是 rgb相加 并不是#000021这样
+						// rgb最多是255 , 如果你 相加 超过255 那么也会当成255
+						// 不能直接使用 名称值运算 Red - 55
+						background: #000000 + 21;
+						// 用括号区分优先级
+						margin: (100px - 70px)*2;
+					}
+
+			}
+
+		-函数
+			- Case {
+				.div1 {
+					background: rgb(255,0,0);
+					width: 100px;
+					height: 100px;
+				}
+			}
+
+		-命名空间 
+			- Case {
+				
+				#head(){
+					background: red;
+					.a {
+						color: green;
+						&:hover {
+							color: red;
+						}
+					}
+				}
+				.head {
+					// 把.a里面的css拿出来
+					#head>.a;
+
+					// 也可以省略 > 号
+					#head .a;
+				}
+
+			}	
+		
+		- 作用域 
+			- Case {
+				// 作用域
+					@color:#fff;
+					.head {
+						width: 100px;
+						height: 100px;
+						h3 {
+							// 这个时候用 color = red ; 并不是在全局找#fff
+							color:@color;
+						}	
+						@color:red;
+					}
+
+					@color:#fff;
+					.head {
+						width: 100px;
+						height: 100px;
+						h3 {
+							// 这时候选择green
+							@color:green;
+							color:@color;
+						}	
+						@color:red;
+					}
+	
+			}
+
+		- 引入
+			- 可以引入一个或者多个Less文件	
+			- Case {
+				// 引入
+				// 如果less里面有 样式 ,那么会合并在一起 , 并且可以调用 里面的变量
+				@import "include.less";
+				// 直接引入css 是不用调用的 , 他会默认合并在一起
+				@import(less) "include2.css";	//(less)无论引入任何文件都当成 Less 操作
+				.div1 {
+					width: @wd;
+					height: @wd;
+					background: red;
+				}
+			}
+
+		- important 关键字
+			- 在调用的混合集后面追加 !important 关键字 , 可以使混合集里面的所有属性都继承 !important
+			- Caes {
+				.foo(@bg:red;@color:white){
+						background: @bg;
+						color: @color;
+					}
+					.head {
+						width: 100px;
+						height: 100px;
+						// background ; color 属性都会加上important 关键字
+						.foo()!important;
+						background: blue; // 权限不够高
+					}
+	
+			}	
+
+		- 条件表达式
+			- Case {
+					// lightness 是获取颜色值的亮度 返回的结果是一个百分比
+						// 255 是 100% , 根据rgb 来测试
+						.minixn (@a) when (lightness(@a) > 50% ){
+							background: black;
+						}	
+						.minixn (@a) when (lightness(@a) < 50% ){
+							background: red;
+						}
+						.div1 {
+							width: 100px;height: 100px;
+							.minixn(#555);	//根据传入的值 进行 判断
+						}
+
+					// 可以用值的类型来匹配函数
+						// iscolor isnumber isstring iskeyword isurl
+						.minixn (@a) when (iscolor(@a)){
+							// 传值判断,如果是一个颜色就执行 black
+							background: black;
+						}
+						.div1 {
+							width: 100px;
+							height: 100px;
+							.minixn(#fff);
+						}
+
+					// 基于单位判断
+						// ispixel ispercentage isem isunit
+						.minixn (@a) when (ispixel(@a)){
+							// 传值判断是否像素,如果是一个颜色就执行 black
+							background: black;
+						}
+						.minixn (@a) when (ispercentage(@a)){
+							// 传值判断是否百分比,如果是一个颜色就执行 black
+							background: red;
+						}
+						.div1 {
+							width: 100px;
+							height: 100px;
+							.minixn(1px);
+						}
+						.div2 {
+							width: 100px;
+							height: 100px;
+							.minixn(1%);
+						}	
+
+			}
+
+		- 循环
+			- 	Case {
+				
+					// 循环递归
+						.loop(@counter) when (@counter > 0){
+							.loop((@counter - 1));
+							width: (10px * @counter);
+						}
+						.div1 {
+							// 50px	40px 30px 20px 10px	
+							// 但是编译过后是 10 20 30 40 50px , 最后采用的是50px
+							.loop(5);	
+							height: 100px;
+							background: red;
+						}
+
+						.loop(@counter) when (@counter > 0){
+							.loop((@counter - 1));
+							// @{} 类似变量 h1 h2 h3 h4 h5
+							h@{counter}{
+								padding: (10px * @counter);
+							}
+						}
+						.head {
+							.loop(5);
+						}	
+				}
+
+		- Less 函数库
+			- color() 解析颜色 , 将代表颜色的字符串转换为颜色值
+				- case {
+					// Less	
+						body {
+							background: color('#f60');
+						}
+					// css
+						body {
+						  background: #ff6600;
+						}
+				}
+
+			- convert() 转换单位 m , cm , mm , in , pt , px , pc
+				- case {
+					// Less
+						body {
+							width: convert(100cm,px);
+							width: convert(100cm,mm);
+						}
+					// Css
+						body {
+						  width: 3779.52755906px;
+						  width: 1000mm;
+						}
+	
+				}
+
+			- escape() 转义 , 输入字符串 url 特殊字符串进行编码	
+
+			- 类型函数
+				- isnumber 如果待验证的值为数字则返回 true ，否则返回 false 。
+				- isstring 如果待验证的值是字符串则返回 true ，否则返回 false 。
+				- iscolor 如果待验证的值为颜色则返回 true ，否则返回 false 。
+				- iskeyword 如果待验证的值为关键字则返回 true ，否则返回 false 。
+				- isurl 如果待验证的值为 url 则返回 true ，否则返回 false 
+				- ispixel 如果待验证的值为像素数则返回 true ，否则返回 false 。
+				- isem 如果待验证的值的单位是 em 则返回 true ，否则返回 false 。
+				- ispercentage 如果待验证的值为百分比则返回 true ，否则返回 false 。
+				- isunit 如果待验证的值为指定单位的数字则返回 true ，否则返回 false 。
+					- case {
+						isunit(11px, px);  // true
+						isunit(2.2%, px);  // false
+						isunit(33px, rem); // false
+						isunit(4rem, rem); // true
+						isunit(56px, "%"); // false
+						isunit(7.8%, '%'); // true
+						isunit(1234, em);  // false
+						isunit(#ff0, pt);  // false
+						isunit("mm", mm);  // false
+		
+					}
+
+			- 颜色定义函数
+				- rgb() 通过十进制红色、绿色、蓝色三种值 (RGB) 创建不透明的颜色对象。
+				- rgba() 通过十进制红色、绿色、蓝色，以及 alpha 四种值 (RGBA) 创建带alpha透明的颜色对象。
+				- argb() 创建格式为 #AARRGGBB 的十六进制颜色值 (注意不是 #RRGGBBAA！)。
+ */
